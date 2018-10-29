@@ -8,6 +8,8 @@ Functions:
 - Betrag setzen, der für den Event benötigt wird (nur admin)
 - Add Admin (Nur durch Owner möglich)
 - Member hinzufügen (alle Admin)
-- Für ein Datum einschreiben (Für alle Member möglich) mit Geldüberweisung
+- Für den Event anmelden (Für alle Member möglich) mit Geldüberweisung
+- Minimum Teilnehmer
+- Maximum Teilnehmer
 - Get Refund wenn zuwenige eingeschrieben
 - Get Refund wenn mehr Geld einbezahlt als benötigt
