@@ -13,3 +13,8 @@ Functions:
 - Maximum Teilnehmer
 - Get Refund wenn zuwenige eingeschrieben
 - Get Refund wenn mehr Geld einbezahlt als benötigt
+
+Offene Fragen:
+- Was passiert wenn setEventDetails aufgerufen wird, nachdem bereits Geld einbezahlt wurde? --> abfangen
+- Withdraw for owner --> Automatische Auszahlung 
+- wenn Betrag nicht erreicht --> withdraw function für member, automatische auszahlung an alle
