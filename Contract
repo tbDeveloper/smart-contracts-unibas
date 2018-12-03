@@ -1,7 +1,4 @@
-0x6ED8e512635868EA91991b90A216d6ff6e2AF38c
-
-
-ABI: 
+0x1d57fc6968d58ad9c524ad70ca16542d6d3e5a18
 
 
 [
@@ -56,6 +53,15 @@ ABI:
 			}
 		],
 		"name": "removeMember",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [],
+		"name": "resolveEvent",
 		"outputs": [],
 		"payable": false,
 		"stateMutability": "nonpayable",
@@ -218,6 +224,34 @@ ABI:
 		"constant": true,
 		"inputs": [],
 		"name": "numberOfAttendees",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "Pot",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "prePayment",
 		"outputs": [
 			{
 				"name": "",
