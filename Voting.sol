@@ -109,7 +109,7 @@ contract SmartVoting {
                 attendees[attendeeAccounts[i]].balance = 0;
             }
             eventAlreadyExisting = false;
-            emit CreateEvent(msg.sender);
+            emit ConfirmEvent(msg.sender);
         }
     }
 
@@ -137,12 +137,13 @@ contract SmartVoting {
 
     // Function to send funds back if minAttendees was not reached
     function withdraw() public onlyMembers {
-        if (block.number >= deadline && attendeeAccounts.length > minAttendees) {
+        if (block.number >= deadline && attendeeAccounts.length < minAttendees) {
             // send funds back to all attendeeAccounts
             for(uint i = 0; i < attendeeAccounts.length; i++) {
                 attendee = attendees[attendeeAccounts[i]];
                 attendeeAccounts[i].transfer(attendee.balance);
-                attendees[attendeeAccounts[i]].balance = 0;
+                attendee.balance = 0;
+                attendee.hasSignedUp = false;
             }
             eventAlreadyExisting = false;
         }
