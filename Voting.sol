@@ -152,20 +152,4 @@ contract SmartVoting {
     function countAttendees() public view returns (uint) {
         return attendeeAccounts.length;
     }
-
-    function isAdmin(address _address) public view returns (bool) {
-        return admins[_address];
-    }
-    
-    function isMember(address _address) public view returns (bool) {
-        return members[_address];
-    }
-
-    function isAttendee(address _address) public view returns (bool) {
-        return members[_address];
-    }
-
-    function showMyBalance() public view returns (uint256) {
-        return attendees[msg.sender].balance;
-    }
 }
