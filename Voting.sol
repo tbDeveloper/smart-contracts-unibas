@@ -1,4 +1,4 @@
-pragma solidity ^0.4.25;
+pragma solidity ^0.5.0;
 
 contract SmartVoting {
     uint public totalAmountNeededForEvent = 0;
@@ -7,18 +7,13 @@ contract SmartVoting {
     uint public maxPaymentPerAttendee = 0;
     uint64 public deadline;
     uint private repayment = 0;
-    bool private eventAlreadyExisting = false;
+    bool eventAlreadyExisting = false;
     address owner = msg.sender;
-    address[] private attendeeAccounts;
-    mapping (address => Attendee) public attendees;
+    uint public numberOfAttendees;
+    mapping (address => uint) public balance;
+    mapping (uint => address payable) public attendees;
     mapping (address => bool) public admins;
     mapping (address => bool) public members;
-    Attendee attendee;
-
-    struct Attendee {
-        uint balance;
-        bool hasSignedUp;
-    }
 
     // Modifiers
     modifier onlyOwner{ 
@@ -86,7 +81,6 @@ contract SmartVoting {
     // Function to set the amount that is required for the event
     function createEvent(uint _amount, uint _minAttendees, uint _maxAttendees, uint64 _deadline) public onlyOwner {
         if(!eventAlreadyExisting) {
-            attendeeAccounts.length = 0;
             totalAmountNeededForEvent = _amount;
             minAttendees = _minAttendees;
             maxAttendees = _maxAttendees;
@@ -98,58 +92,57 @@ contract SmartVoting {
         }        
     }
 
-    function confirmEvent() public payable onlyOwner {
-        if(attendeeAccounts.length == maxAttendees || (block.number >= deadline && attendeeAccounts.length >= minAttendees)) {
-            uint256 costPerAttendee = totalAmountNeededForEvent / attendeeAccounts.length;
-            msg.sender.transfer(totalAmountNeededForEvent);
-            
-            // send difference back to all attendeeAccounts
-            for(uint i = 0; i < attendeeAccounts.length; i++) {
-                attendeeAccounts[i].transfer(attendees[attendeeAccounts[i]].balance - costPerAttendee);
-                attendees[attendeeAccounts[i]].balance = 0;
-            }
-            eventAlreadyExisting = false;
-            emit ConfirmEvent(msg.sender);
-        }
-    }
-
-    function cancelEvent() public payable onlyOwner {
-        // send funds back to all attendeeAccounts
-        for(uint i = 0; i < attendeeAccounts.length; i++) {
-            attendeeAccounts[i].transfer(attendees[attendeeAccounts[i]].balance);
-            attendees[attendeeAccounts[i]].balance = 0;
-        }
-        eventAlreadyExisting = false;
-    }
-
     // Function to sign up for the event
     function signUpForEvent() public payable onlyMembers {
-        attendee = attendees[msg.sender];
-        if(msg.value >= maxPaymentPerAttendee && block.number < deadline && !attendee.hasSignedUp) {
-            attendee.hasSignedUp = true;
-            attendee.balance = maxPaymentPerAttendee;
-            attendeeAccounts.push(msg.sender);
+        if(msg.value >= maxPaymentPerAttendee && block.number < deadline && balance[msg.sender] == 0 && numberOfAttendees < maxAttendees) {
+            attendees[numberOfAttendees] = msg.sender;
+            numberOfAttendees += 1;
+            balance[msg.sender] = maxPaymentPerAttendee;
             msg.sender.transfer(msg.value - maxPaymentPerAttendee);
         } else {
             msg.sender.transfer(msg.value);
         }
     }
 
-    // Function to send funds back if minAttendees was not reached
-    function withdraw() public onlyMembers {
-        if (block.number >= deadline && attendeeAccounts.length < minAttendees) {
-            // send funds back to all attendeeAccounts
-            for(uint i = 0; i < attendeeAccounts.length; i++) {
-                attendee = attendees[attendeeAccounts[i]];
-                attendeeAccounts[i].transfer(attendee.balance);
-                attendee.balance = 0;
-                attendee.hasSignedUp = false;
+    function confirmEvent() public payable onlyOwner {
+        if(numberOfAttendees == maxAttendees || (block.number >= deadline && numberOfAttendees >= minAttendees)) {
+            uint256 costPerAttendee = totalAmountNeededForEvent / numberOfAttendees;
+            msg.sender.transfer(totalAmountNeededForEvent);
+            
+            // send difference back to all attendeeAccounts
+            for(uint i = 0; i < numberOfAttendees; i++) {
+                attendees[i].transfer(balance[attendees[i]] - costPerAttendee);
+                balance[attendees[i]] = 0;
             }
-            eventAlreadyExisting = false;
+            resetEvent();
+            emit ConfirmEvent(msg.sender);
         }
     }
 
-    function countAttendees() public view returns (uint) {
-        return attendeeAccounts.length;
+    function cancelEvent() public payable onlyOwner {
+        // send funds back to all attendeeAccounts
+        payBackEverything();
+        resetEvent();
+    }
+
+    // Function to send funds back if minAttendees was not reached
+    function withdraw() public payable onlyMembers {
+        if (block.number >= deadline && numberOfAttendees < minAttendees) {
+            // send funds back to all attendees
+            payBackEverything();
+            resetEvent();
+        }
+    }
+
+    function resetEvent() private {
+        eventAlreadyExisting = false;
+        numberOfAttendees = 0;
+    }
+
+    function payBackEverything() private {
+        for(uint i = 0; i < numberOfAttendees; i++) {
+            attendees[i].transfer(balance[attendees[i]]);
+            balance[attendees[i]] = 0;
+        }
     }
 }
