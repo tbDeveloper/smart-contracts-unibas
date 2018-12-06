@@ -7,7 +7,7 @@ contract SmartVoting {
     uint public maxPaymentPerAttendee = 0;
     uint64 public deadline;
     uint private repayment = 0;
-    bool eventAlreadyExisting = false;
+    bool public eventAlreadyExisting = false;
     address owner = msg.sender;
     uint public numberOfAttendees;
     mapping (address => uint) public balance;
@@ -47,10 +47,6 @@ contract SmartVoting {
         uint _minAttendees,
         uint _maxAttendees,
         uint64 _deadline
-    );
-
-    event ConfirmEvent(
-        address indexed _from
     );
 
     // Fallback function
@@ -115,7 +111,6 @@ contract SmartVoting {
                 balance[attendees[i]] = 0;
             }
             resetEvent();
-            emit ConfirmEvent(msg.sender);
         }
     }
 
@@ -135,6 +130,11 @@ contract SmartVoting {
     }
 
     function resetEvent() private {
+        totalAmountNeededForEvent = 0;
+        minAttendees = 1;
+        maxAttendees = 1;
+        maxPaymentPerAttendee = 0;
+        deadline = 0;
         eventAlreadyExisting = false;
         numberOfAttendees = 0;
     }
