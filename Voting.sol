@@ -74,7 +74,7 @@ contract SmartVoting {
         admins[_admin] = false;
     }
 
-    // Function to set the amount that is required for the event
+    // Function to set the event details
     function createEvent(uint _amount, uint _minAttendees, uint _maxAttendees, uint64 _deadline) public onlyOwner {
         if(!eventAlreadyExisting) {
             totalAmountNeededForEvent = _amount;
@@ -105,18 +105,15 @@ contract SmartVoting {
             uint256 costPerAttendee = totalAmountNeededForEvent / numberOfAttendees;
             msg.sender.transfer(totalAmountNeededForEvent);
             
-            // send difference back to all attendeeAccounts
-            for(uint i = 0; i < numberOfAttendees; i++) {
-                attendees[i].transfer(balance[attendees[i]] - costPerAttendee);
-                balance[attendees[i]] = 0;
-            }
+            // send difference back to all attendees
+            payBack(costPerAttendee);
             resetEvent();
         }
     }
 
     function cancelEvent() public payable onlyOwner {
-        // send funds back to all attendeeAccounts
-        payBackEverything();
+        // send funds back to all attendees
+        payBack(0);
         resetEvent();
     }
 
@@ -124,7 +121,7 @@ contract SmartVoting {
     function withdraw() public payable onlyMembers {
         if (block.number >= deadline && numberOfAttendees < minAttendees) {
             // send funds back to all attendees
-            payBackEverything();
+            payBack(0);
             resetEvent();
         }
     }
@@ -139,10 +136,11 @@ contract SmartVoting {
         numberOfAttendees = 0;
     }
 
-    function payBackEverything() private {
+    function payBack(uint _residual) private {
         for(uint i = 0; i < numberOfAttendees; i++) {
-            attendees[i].transfer(balance[attendees[i]]);
+            attendees[i].transfer(balance[attendees[i]] - _residual);
             balance[attendees[i]] = 0;
+            attendees[i] = 0x0000000000000000000000000000000000000000;
         }
     }
 }
